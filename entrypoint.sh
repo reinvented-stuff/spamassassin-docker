@@ -6,8 +6,8 @@
 set -e
 
 echo "Updating spamassassin databases"
-sa-update
+/usr/bin/sa-update --nogpg -v
 
 echo "Starting spamd"
-spamd ${SPAMDOPTIONS}
+/usr/sbin/spamd ${SPAMDOPTIONS}
 

@@ -7,6 +7,7 @@ spamassassin version: 3.4.6-r7
 ```bash
 mkdir -pv /opt/spamassassin/etc/mail/spamassassin
 mkdir -pv /opt/spamassassin/var/log
+mkdir -pv /opt/spamassassin/var/lib/spamassassin
 mkdir -pv /opt/spamassassin/tmp/.spamassassin
 ```
 
@@ -44,15 +45,36 @@ EOF
 ```
 
 ```bash
-cat <<EOF > /opt/spamassassin/etc/mail/spamassassin/v341.pre
+cat <<EOF > /opt/spamassassin/etc/mail/spamassassin/init.pre
+# URIDNSBL - look up URLs found in the message against several DNS
+# blocklists.
+#
+loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+# SPF - perform SPF verification.
+#
+loadplugin Mail::SpamAssassin::Plugin::SPF
+
 # TxRep - Reputation database that replaces AWL
 loadplugin Mail::SpamAssassin::Plugin::TxRep
+
+# HashBL - Query hashed/unhashed strings, emails, uris etc from DNS lists
+loadplugin Mail::SpamAssassin::Plugin::HashBL
+
+# Phishing - finds uris used in phishing campaigns detected by
+# OpenPhish or PhishTank feeds.
+loadplugin Mail::SpamAssassin::Plugin::Phishing
 
 EOF
 ```
 
 ```bash
-export SPAMDOPTIONS="--pidfile=/var/run/spamassassin.pid --create-prefs --max-children=8 --min-children=1 --listen=0.0.0.0 --setuid-with-sql --nouser-config"
+export SPAMDOPTIONS="--pidfile=/var/run/spamassassin.pid --create-prefs --max-children=8 --min-children=1 --listen=0.0.0.0 --setuid-with-sql --nouser-config --syslog=/var/log/spamd.log -u nobody"
+```
+
+```bash
+spamassassin -D --lint
+echo -e "From: myself@mymailserver.net\nTo:myfriend@domain.net\nSubject: test\n\n" | spamc
 ```
 
 ```bash
@@ -63,10 +85,11 @@ podman run \
   --pid host \
   -ti \
   -p 783:783 \
-  -e SPAMDOPTIONS="--pidfile=/var/run/spamassassin.pid --create-prefs --max-children=8 --min-children=1 --listen=0.0.0.0 --setuid-with-sql --nouser-config" \
+  -e SPAMDOPTIONS="--pidfile=/var/run/spamassassin.pid --create-prefs --max-children=8 --min-children=1 --listen=0.0.0.0 --setuid-with-sql --nouser-config --syslog=/var/log/spamd.log -u nobody" \
   -v "/opt/spamassassin/etc/mail/spamassassin/local.cf:/etc/mail/spamassassin/local.cf" \
-  -v "/opt/spamassassin/etc/mail/spamassassin/v341.pre:/etc/mail/spamassassin/v341.pre" \
+  -v "/opt/spamassassin/etc/mail/spamassassin/init.pre:/etc/mail/spamassassin/init.pre" \
   -v "/opt/spamassassin/var/log:/var/log" \
+  -v "/opt/spamassassin/var/lib/spamassassin:/var/lib/spamassassin" \
   -v "/opt/spamassassin/tmp/.spamassassin:/tmp/.spamassassin" \
   reinventedstuff/spamassassin-docker:3.4.6
 ```

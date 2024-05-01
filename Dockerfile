@@ -12,7 +12,8 @@ LABEL org.opencontainers.image.version="${APP_VERSION}"
 
 RUN apk update && \
   apk add --no-cache \
-    spamassassin=3.4.6-r7
+    spamassassin=3.4.6-r7 \
+    spamassassin-client=3.4.6-r7
 
 COPY entrypoint.sh /entrypoint.sh
 
