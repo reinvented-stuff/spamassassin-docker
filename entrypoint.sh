@@ -3,8 +3,6 @@
 # Entrypoint script
 #
 
-set -e
-
 echo "Updating spamassassin databases"
 /usr/bin/sa-update --nogpg -v
 

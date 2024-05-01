@@ -12,6 +12,10 @@ LABEL org.opencontainers.image.version="${APP_VERSION}"
 
 RUN apk update && \
   apk add --no-cache \
+    perl-dbi \
+    perl-dbd-mysql \
+    perl-dbd-pg \
+    perl-dbd-sqlite \
     spamassassin=3.4.6-r7 \
     spamassassin-client=3.4.6-r7
 

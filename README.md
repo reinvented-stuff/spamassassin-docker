@@ -4,6 +4,18 @@ Spamassassin in a Docker container.
 
 spamassassin version: 3.4.6-r7
 
+## Build
+
+```bash
+docker manifest create \
+  reinventedstuff/spamassassin-docker:3.4.6 \
+  --amend reinventedstuff/spamassassin-docker:3.4.6-amd64 \
+  --amend reinventedstuff/spamassassin-docker:3.4.6-arm64v8
+
+```
+
+## Configuration
+
 ```bash
 mkdir -pv /opt/spamassassin/etc/mail/spamassassin
 mkdir -pv /opt/spamassassin/var/log
@@ -77,6 +89,15 @@ spamassassin -D --lint
 echo -e "From: myself@mymailserver.net\nTo:myfriend@domain.net\nSubject: test\n\n" | spamc
 ```
 
+## Database setup
+
+```bash
+CREATE USER 'spamassassin'@'localhost' IDENTIFIED BY 'pass123';
+GRANT USAGE ON `spamassassin`.* TO 'spamassassin'@'localhost';
+```
+
+## Deploy
+
 ```bash
 podman run \
   --name spamassassin \
@@ -94,11 +115,9 @@ podman run \
   reinventedstuff/spamassassin-docker:3.4.6
 ```
 
+## Learning
 
 ```bash
-docker manifest create \
-  reinventedstuff/spamassassin-docker:3.4.6 \
-  --amend reinventedstuff/spamassassin-docker:3.4.6-amd64 \
-  --amend reinventedstuff/spamassassin-docker:3.4.6-arm64v8
-
+sa-learn --spam file
+sa-learn --ham file 
 ```
